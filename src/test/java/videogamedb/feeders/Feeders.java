@@ -3,6 +3,10 @@ package videogamedb.feeders;
 import io.gatling.javaapi.core.*;
 import io.gatling.javaapi.http.*;
 
+import java.util.*;
+import java.util.function.Supplier;
+import java.util.stream.Stream;
+
 import static io.gatling.javaapi.core.CoreDsl.*;
 import static io.gatling.javaapi.http.HttpDsl.*;
 
@@ -13,12 +17,17 @@ public class Feeders extends Simulation {
             .contentTypeHeader("application/json")
             .acceptHeader("application/json");
 
-    private static FeederBuilder.FileBased<Object> jsonFile = jsonFile("data/gameJsonFile.json").circular();
+    private static Iterator<Map<String, Object>> customFeeder =
+            Stream.generate((Supplier<Map<String, Object>>) () -> {
+                Random rand = new Random();
+                int gameId = rand.nextInt(10-1+1) +1;
+                return Collections.singletonMap("gameId",gameId);
+                    }
+            ).iterator();
     private static ChainBuilder getSpecificGames =
-            feed(jsonFile)
-                    .exec(http("Get a specific game Name - #{name}")
-                    .get("/videogame/#{id}")
-                            .check(jmesPath("name").isEL("#{name}"))
+            feed(customFeeder)
+                    .exec(http("Get a specific game Name - #{gameId}")
+                    .get("/videogame/#{gameId}")
                             .check(status().in(200, 210)));
 
     private ScenarioBuilder scn = scenario("Main")
