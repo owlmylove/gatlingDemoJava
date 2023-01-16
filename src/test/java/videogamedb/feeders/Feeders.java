@@ -13,12 +13,12 @@ public class Feeders extends Simulation {
             .contentTypeHeader("application/json")
             .acceptHeader("application/json");
 
-    private static FeederBuilder.FileBased<String> csvFeeder = csv("data/gameCsvFile.csv").circular();
+    private static FeederBuilder.FileBased<Object> jsonFile = jsonFile("data/gameJsonFile.json").circular();
     private static ChainBuilder getSpecificGames =
-            feed(csvFeeder)
-                    .exec(http("Get a specific game Name - #{gameName}")
-                    .get("/videogame/#{gameId}")
-                            .check(jmesPath("name").isEL("#{gameName}"))
+            feed(jsonFile)
+                    .exec(http("Get a specific game Name - #{name}")
+                    .get("/videogame/#{id}")
+                            .check(jmesPath("name").isEL("#{name}"))
                             .check(status().in(200, 210)));
 
     private ScenarioBuilder scn = scenario("Main")
