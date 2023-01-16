@@ -17,7 +17,8 @@ public class VideoGameDb extends Simulation {
     private ScenarioBuilder scn = scenario("First Scenario")
             .exec(http("Get all Games - 1st call")
                     .get("/videogame")
-                    .check(status().is(200)))
+                    .check(status().is(200))
+                    .check(jsonPath("$[?(@.id==1)].name").is("Resident Evil 4")))
             .pause("5")
 
             .exec(http("Get a specific game - 2")
