@@ -28,10 +28,24 @@ public class VideoGameDb extends Simulation {
                     .check(status().not(404), status().not(500))
                     .check(jmesPath("[1].id").saveAs("gameId")))
             .pause(Duration.ofMillis(4000))
+            .exec(
+                    session -> {
+                        System.out.println(session);
+                        System.out.println("gameId set to " + session.getString("gameId"));
+                        return session;
+                    }
+            )
 
             .exec(http("Get a specific game - #{gameId}")
                     .get("/videogame/#{gameId}")
-                    .check(jmesPath("name").is("Gran Turismo 3")));
+                    .check(jmesPath("name").is("Gran Turismo 3"))
+                    .check(bodyString().saveAs("responseBody")))
+            .exec(
+                    session -> {
+                        System.out.println("Response Body is " + session.getString("responseBody"));
+                        return session;
+                     }
+                    );
 
     {
         setUp(
