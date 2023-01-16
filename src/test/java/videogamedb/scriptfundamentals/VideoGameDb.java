@@ -12,14 +12,19 @@ import static io.gatling.javaapi.http.HttpDsl.*;
 public class VideoGameDb extends Simulation {
 
     private static ChainBuilder getAllVideoGames =
-            exec(http("Get all videogames")
+            repeat(3).on(
+                    exec(http("Get all videogames")
                     .get("/videogame")
-                    .check(status().not(400), status().not(500)));
+                    .check(status().not(400), status().not(500)))
+            );
+
 
     private static ChainBuilder getSpecificGame =
-            exec(http("Get a specific game")
-                    .get("/videogame/1")
-                    .check(status().in(200, 210)));
+            repeat(5,"myCounter").on(
+                    exec(http("Get a specific game Id - #{myCounter}")
+                            .get("/videogame/#{myCounter}")
+                            .check(status().in(200, 210)))
+            );
 
     private HttpProtocolBuilder httpProtocol = http
             .baseUrl("https://www.videogamedb.uk/api")
@@ -31,7 +36,9 @@ public class VideoGameDb extends Simulation {
             .pause(5)
             .exec(getSpecificGame)
             .pause(1, 5)
-            .exec(getAllVideoGames);
+            .repeat(2).on(
+                    exec(getAllVideoGames)
+            );
 
     {
         setUp(
