@@ -16,21 +16,22 @@ public class VideoGameDb extends Simulation {
             .acceptHeader("application/json");
 
     private ScenarioBuilder scn = scenario("First Scenario")
-            .exec(http("Get all Games - 1st call")
-                    .get("/videogame")
-                    .check(status().is(200))
-                    .check(jmesPath("[? id == `1`].name").ofList().is(List.of("Resident Evil 4"))))
-            .pause("5")
 
-            .exec(http("Get a specific game - 2")
-                    .get("/videogame/2")
-                    .check(status().in(200,201,204)))
-            .pause(1,5)
+            .exec(http("Get a specific game - 1")
+                    .get("/videogame/1")
+                    .check(status().in(200,201,204))
+                    .check(jmesPath("name").is("Resident Evil 4")))
+            .pause(1,10)
 
-            .exec(http("Get all Games - 2d call")
+            .exec(http("Get all Games")
                     .get("/videogame")
-                    .check(status().not(404), status().not(500)))
-            .pause(Duration.ofMillis(4000));
+                    .check(status().not(404), status().not(500))
+                    .check(jmesPath("[1].id").saveAs("gameId")))
+            .pause(Duration.ofMillis(4000))
+
+            .exec(http("Get a specific game - #{gameId}")
+                    .get("/videogame/#{gameId}")
+                    .check(jmesPath("name").is("Gran Turismo 3")));
 
     {
         setUp(
