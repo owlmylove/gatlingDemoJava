@@ -12,17 +12,21 @@ public class VideoGameSimulation extends Simulation {
             .acceptHeader("application/json")
             .contentTypeHeader("application/json");
 
+    private static ChainBuilder getAllGames =
+            exec(http("Get all games")
+                    .get("/videogame"));
+
     private ScenarioBuilder scn = scenario("Get all games")
-            .exec(http("Get all games")
-                    .get("/videogame")
-                    .check(status().in(200,210)));
+            .forever().on(
+                    exec(getAllGames)
+            );
 
     {
         setUp(
            scn.injectOpen(
                    nothingFor(5),
                    rampUsersPerSec(1).to(3).during(10).randomized()
-           )
-    ).protocols(httpProtocol);
+    ).protocols(httpProtocol)
+        ).maxDuration(60);
     }
 }
