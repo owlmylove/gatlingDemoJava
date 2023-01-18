@@ -12,6 +12,19 @@ public class VideoGameSimulation extends Simulation {
             .acceptHeader("application/json")
             .contentTypeHeader("application/json");
 
+    private static final int USER_COUNT = Integer.parseInt(System.getProperty("USERS", "5"));
+    private static final int RAMP_DURATION = Integer.parseInt(System.getProperty("RAMP_DURATION", "10"));
+    private static final int TEST_DURATION = Integer.parseInt(System.getProperty("TEST_DURATION", "20"));
+
+    @Override
+    public void before(){
+        System.out.printf("Running test with %d users%n", USER_COUNT);
+        System.out.printf("Running users over %d seconds%n", RAMP_DURATION);
+        System.out.printf("Total test duration: %d seconds%n", TEST_DURATION);
+
+    }
+
+
     private static ChainBuilder getAllGames =
             exec(http("Get all games")
                     .get("/videogame"));
@@ -25,8 +38,13 @@ public class VideoGameSimulation extends Simulation {
         setUp(
            scn.injectOpen(
                    nothingFor(5),
-                   rampUsersPerSec(1).to(3).during(10).randomized()
+                   rampUsers(USER_COUNT).during(RAMP_DURATION)
     ).protocols(httpProtocol)
-        ).maxDuration(60);
+        ).maxDuration(TEST_DURATION);
     }
 }
+
+// Run locally in terminal
+// mvn gatling:test -Dgatling.simulationClass=videogamedb.simulations.VideoGameSimulation
+// Locally with test parameters
+// mvn gatling:test -Dgatling.simulationClass=videogamedb.simulations.VideoGameSimulation -DUSERS=10 -DRAMP_DURATION=15 -DTEST_DURATION=30
